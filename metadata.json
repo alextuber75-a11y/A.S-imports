@@ -1,0 +1,6 @@
+{
+  "name": "A.S Imports Variedades",
+  "description": "Site institucional e vitrine de produtos da A.S Imports Variedades. Diversas marcas, qualidade, praticidade e atendimento personalizado pelo WhatsApp.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

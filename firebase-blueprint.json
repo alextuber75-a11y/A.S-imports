@@ -1,0 +1,291 @@
+{
+  "entities": {
+    "SiteContent": {
+      "title": "SiteContent",
+      "description": "Configurações institucionais editáveis da A.S Imports Variedades, incluindo identidade visual, textos, diferenciais, contatos e rodapé.",
+      "type": "object",
+      "properties": {
+        "brandName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "customLogoUrl": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 400000
+        },
+        "heroTitle": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "heroSubtitle": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "heroPrimaryCta": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "heroSecondaryCta": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "heroImageUrl": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 400000
+        },
+        "heroImageCaption": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 180
+        },
+        "heroHighlights": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 240
+        },
+        "aboutTitle": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "aboutText": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "aboutPillars": {
+          "type": "array",
+          "description": "Lista de até 6 pilares institucionais"
+        },
+        "categoriesTitle": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "categoriesSubtitle": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 500
+        },
+        "showcaseTitle": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "showcaseSubtitle": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 500
+        },
+        "whyTitle": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "whySubtitle": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 400
+        },
+        "whyReasons": {
+          "type": "array",
+          "description": "Lista de até 10 motivos para escolher a empresa"
+        },
+        "contactTitle": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 140
+        },
+        "contactSubtitle": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 600
+        },
+        "whatsappUrl": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "instagramHandle": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 100
+        },
+        "instagramUrl": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 300
+        },
+        "otherSocialTitle": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 100
+        },
+        "otherSocialDescription": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 240
+        },
+        "otherSocialUrl": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 300
+        },
+        "footerBrandTitle": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "footerSlogan": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 60
+        }
+      },
+      "required": [
+        "brandName",
+        "heroTitle",
+        "heroSubtitle",
+        "heroPrimaryCta",
+        "heroSecondaryCta",
+        "aboutTitle",
+        "aboutText",
+        "categoriesTitle",
+        "showcaseTitle",
+        "whyTitle",
+        "contactTitle",
+        "whatsappUrl",
+        "footerBrandTitle",
+        "footerSlogan"
+      ]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "Categoria de produtos exibida na seção de variedades e filtros da vitrine.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "description": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 300
+        },
+        "sortOrder": {
+          "type": "number"
+        }
+      },
+      "required": ["name", "description", "sortOrder"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "Item exibido na vitrine institucional de produtos.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 140
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "brand": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "categoryId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "imageUrl": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 400000
+        },
+        "price": {
+          "type": "number"
+        },
+        "featured": {
+          "type": "boolean"
+        },
+        "visible": {
+          "type": "boolean"
+        },
+        "sortOrder": {
+          "type": "number"
+        }
+      },
+      "required": ["name", "description", "brand", "categoryId", "visible", "sortOrder"]
+    },
+    "AdminUser": {
+      "title": "AdminUser",
+      "description": "Administrador autorizado a gerenciar o site e a vitrine.",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "maxLength": 180
+        },
+        "role": {
+          "type": "string",
+          "enum": ["admin"],
+          "maxLength": 20
+        },
+        "addedAt": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 60
+        }
+      },
+      "required": ["email", "role"]
+    }
+  },
+  "firestore": {
+    "/siteContent/{contentId}": {
+      "schema": {
+        "$ref": "#/entities/SiteContent"
+      },
+      "description": "Documento principal de configurações e textos editáveis do site institucional."
+    },
+    "/categories/{categoryId}": {
+      "schema": {
+        "$ref": "#/entities/Category"
+      },
+      "description": "Categorias de produtos da loja."
+    },
+    "/products/{productId}": {
+      "schema": {
+        "$ref": "#/entities/Product"
+      },
+      "description": "Produtos publicados na vitrine institucional."
+    },
+    "/admins/{userId}": {
+      "schema": {
+        "$ref": "#/entities/AdminUser"
+      },
+      "description": "Lista de administradores autorizados (PII restrita a admins)."
+    }
+  }
+}

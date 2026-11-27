@@ -1,0 +1,254 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global safety net: deny everything by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Reusable primitives
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isBootstrappedAdmin() {
+      return isVerifiedUser() && (
+        request.auth.token.email == 'alextuber75@gmail.com' ||
+        request.auth.token.email == 'a.simports373@gmail.com'
+      );
+    }
+
+    function isAdmin() {
+      return isBootstrappedAdmin() || (
+        isVerifiedUser() &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isOptionalString(data, key, maxLen) {
+      return !(key in data) || (data[key] is string && data[key].size() <= maxLen);
+    }
+
+    function isValidSiteContent(data) {
+      return data.keys().hasAll([
+        'brandName',
+        'heroTitle',
+        'heroSubtitle',
+        'heroPrimaryCta',
+        'heroSecondaryCta',
+        'aboutTitle',
+        'aboutText',
+        'categoriesTitle',
+        'showcaseTitle',
+        'whyTitle',
+        'contactTitle',
+        'whatsappUrl',
+        'footerBrandTitle',
+        'footerSlogan'
+      ]) &&
+      data.keys().hasOnly([
+        'brandName',
+        'customLogoUrl',
+        'heroTitle',
+        'heroSubtitle',
+        'heroPrimaryCta',
+        'heroSecondaryCta',
+        'heroImageUrl',
+        'heroImageCaption',
+        'heroHighlights',
+        'aboutTitle',
+        'aboutText',
+        'aboutPillars',
+        'categoriesTitle',
+        'categoriesSubtitle',
+        'showcaseTitle',
+        'showcaseSubtitle',
+        'whyTitle',
+        'whySubtitle',
+        'whyReasons',
+        'contactTitle',
+        'contactSubtitle',
+        'whatsappUrl',
+        'instagramHandle',
+        'instagramUrl',
+        'otherSocialTitle',
+        'otherSocialDescription',
+        'otherSocialUrl',
+        'footerBrandTitle',
+        'footerSlogan',
+        'updatedAt'
+      ]) &&
+      data.brandName is string && data.brandName.size() >= 1 && data.brandName.size() <= 100 &&
+      isOptionalString(data, 'customLogoUrl', 400000) &&
+      data.heroTitle is string && data.heroTitle.size() >= 1 && data.heroTitle.size() <= 160 &&
+      data.heroSubtitle is string && data.heroSubtitle.size() >= 1 && data.heroSubtitle.size() <= 300 &&
+      data.heroPrimaryCta is string && data.heroPrimaryCta.size() >= 1 && data.heroPrimaryCta.size() <= 80 &&
+      data.heroSecondaryCta is string && data.heroSecondaryCta.size() >= 1 && data.heroSecondaryCta.size() <= 80 &&
+      isOptionalString(data, 'heroImageUrl', 400000) &&
+      isOptionalString(data, 'heroImageCaption', 180) &&
+      isOptionalString(data, 'heroHighlights', 240) &&
+      data.aboutTitle is string && data.aboutTitle.size() >= 1 && data.aboutTitle.size() <= 120 &&
+      data.aboutText is string && data.aboutText.size() >= 1 && data.aboutText.size() <= 1500 &&
+      (!('aboutPillars' in data) || (
+        data.aboutPillars is list &&
+        data.aboutPillars.size() <= 6 &&
+        (data.aboutPillars.size() == 0 || data.aboutPillars[0] is map)
+      )) &&
+      data.categoriesTitle is string && data.categoriesTitle.size() >= 1 && data.categoriesTitle.size() <= 120 &&
+      isOptionalString(data, 'categoriesSubtitle', 500) &&
+      data.showcaseTitle is string && data.showcaseTitle.size() >= 1 && data.showcaseTitle.size() <= 120 &&
+      isOptionalString(data, 'showcaseSubtitle', 500) &&
+      data.whyTitle is string && data.whyTitle.size() >= 1 && data.whyTitle.size() <= 120 &&
+      isOptionalString(data, 'whySubtitle', 400) &&
+      (!('whyReasons' in data) || (
+        data.whyReasons is list &&
+        data.whyReasons.size() <= 10 &&
+        (data.whyReasons.size() == 0 || data.whyReasons[0] is map)
+      )) &&
+      data.contactTitle is string && data.contactTitle.size() >= 1 && data.contactTitle.size() <= 140 &&
+      isOptionalString(data, 'contactSubtitle', 600) &&
+      data.whatsappUrl is string && data.whatsappUrl.size() >= 1 && data.whatsappUrl.size() <= 300 &&
+      isOptionalString(data, 'instagramHandle', 100) &&
+      isOptionalString(data, 'instagramUrl', 300) &&
+      isOptionalString(data, 'otherSocialTitle', 100) &&
+      isOptionalString(data, 'otherSocialDescription', 240) &&
+      isOptionalString(data, 'otherSocialUrl', 300) &&
+      data.footerBrandTitle is string && data.footerBrandTitle.size() >= 1 && data.footerBrandTitle.size() <= 100 &&
+      data.footerSlogan is string && data.footerSlogan.size() >= 1 && data.footerSlogan.size() <= 240 &&
+      isOptionalString(data, 'updatedAt', 60);
+    }
+
+    function isValidCategory(data) {
+      return data.keys().hasAll(['name', 'description', 'sortOrder']) &&
+        data.keys().hasOnly(['name', 'description', 'sortOrder']) &&
+        data.name is string && data.name.size() >= 1 && data.name.size() <= 80 &&
+        data.description is string && data.description.size() <= 300 &&
+        data.sortOrder is number;
+    }
+
+    function isValidProduct(data) {
+      return data.keys().hasAll(['name', 'description', 'brand', 'categoryId', 'visible', 'sortOrder']) &&
+        data.keys().hasOnly(['name', 'description', 'brand', 'categoryId', 'imageUrl', 'price', 'featured', 'visible', 'sortOrder']) &&
+        data.name is string && data.name.size() >= 1 && data.name.size() <= 140 &&
+        data.description is string && data.description.size() >= 1 && data.description.size() <= 1000 &&
+        data.brand is string && data.brand.size() >= 1 && data.brand.size() <= 80 &&
+        isValidId(data.categoryId) &&
+        isOptionalString(data, 'imageUrl', 400000) &&
+        (!('price' in data) || data.price == null || (data.price is number && data.price >= 0)) &&
+        (!('featured' in data) || data.featured is bool) &&
+        data.visible is bool &&
+        data.sortOrder is number;
+    }
+
+    function isValidAdminUser(data) {
+      return data.keys().hasAll(['email', 'role']) &&
+        data.keys().hasOnly(['email', 'role', 'addedAt']) &&
+        data.email is string && data.email.size() >= 3 && data.email.size() <= 180 &&
+        data.role == 'admin' &&
+        isOptionalString(data, 'addedAt', 60);
+    }
+
+    // Connection test doc
+    match /test/connection {
+      allow get: if true;
+    }
+
+    // Public institutional site content, admin-only writes
+    match /siteContent/{contentId} {
+      allow get: if isValidId(contentId);
+      allow list: if false;
+      allow create: if isValidId(contentId) && isValidSiteContent(incoming()) && isAdmin();
+      allow update: if isValidId(contentId) && isValidSiteContent(incoming()) && isAdmin() &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'brandName',
+          'customLogoUrl',
+          'heroTitle',
+          'heroSubtitle',
+          'heroPrimaryCta',
+          'heroSecondaryCta',
+          'heroImageUrl',
+          'heroImageCaption',
+          'heroHighlights',
+          'aboutTitle',
+          'aboutText',
+          'aboutPillars',
+          'categoriesTitle',
+          'categoriesSubtitle',
+          'showcaseTitle',
+          'showcaseSubtitle',
+          'whyTitle',
+          'whySubtitle',
+          'whyReasons',
+          'contactTitle',
+          'contactSubtitle',
+          'whatsappUrl',
+          'instagramHandle',
+          'instagramUrl',
+          'otherSocialTitle',
+          'otherSocialDescription',
+          'otherSocialUrl',
+          'footerBrandTitle',
+          'footerSlogan',
+          'updatedAt'
+        ]);
+      allow delete: if false;
+    }
+
+    // Public product categories, admin-only mutations
+    match /categories/{categoryId} {
+      allow get: if isValidId(categoryId);
+      allow list: if true;
+      allow create: if isValidId(categoryId) && isValidCategory(incoming()) && isAdmin();
+      allow update: if isValidId(categoryId) && isValidCategory(incoming()) && isAdmin() &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'description', 'sortOrder']);
+      allow delete: if isValidId(categoryId) && isAdmin();
+    }
+
+    // Public showcase products, admin-only mutations
+    match /products/{productId} {
+      allow get: if isValidId(productId) && (resource.data.visible == true || isAdmin());
+      allow list: if resource.data.visible == true || isBootstrappedAdmin();
+      allow create: if isValidId(productId) && isValidProduct(incoming()) && isAdmin() &&
+        existsAfter(/databases/$(database)/documents/categories/$(incoming().categoryId));
+      allow update: if isValidId(productId) && isValidProduct(incoming()) && isAdmin() &&
+        existsAfter(/databases/$(database)/documents/categories/$(incoming().categoryId)) &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'name',
+          'description',
+          'brand',
+          'categoryId',
+          'imageUrl',
+          'price',
+          'featured',
+          'visible',
+          'sortOrder'
+        ]);
+      allow delete: if isValidId(productId) && isAdmin();
+    }
+
+    // Admin list (strictly restricted to verified admins - PII isolated)
+    match /admins/{userId} {
+      allow get: if isValidId(userId) && ((isSignedIn() && request.auth.uid == userId) || isAdmin());
+      allow list: if isBootstrappedAdmin() && resource.data.role == 'admin';
+      allow create: if isValidId(userId) && isValidAdminUser(incoming()) && isAdmin();
+      allow update: if false;
+      allow delete: if isValidId(userId) && isAdmin();
+    }
+  }
+}
